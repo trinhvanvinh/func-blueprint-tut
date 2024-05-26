@@ -1,8 +1,60 @@
 #include "imports/stdlib.fc";
 
-() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+const int min_tons_for_storage = 1000000000;
 
+;; update smc,
+;; transfer
+;; deposit 
+;; owner withdraw 
+;; change owner
+
+(int) load_data() {
+    var ds = get_data().begin_parse();
+    return(ds~load_uint(32));
 }
+
+(int) store_data(int value){
+    set_data(
+        begin_cell()
+        .store_uint(value, 32)
+        .end_cell()
+    );
+    return value;
+}
+
+;; int get_smc_balance() method_id {
+;;     [balance, _] = get_balance();
+;;     return balance;
+;; }
+
+int set_value(int value) method_id {
+    (int value) = store_data(value);
+    return value;
+}
+
+int get_value() method_id {
+    (int value) = load_data();
+    return value;
+}
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    slice cs = in_msg_full.begin_parse();
+    ;;int flags = cs~load_uint();
+
+    ~dump(in_msg_body); 
+
+    int op = in_msg_body~load_uint(32);
+
+    if(op == "set_value"){
+        store_data(value);
+    }
+
+    return ();
+}
+
+;; () recv_external(slice in_msg) impure {
+;;     return in_msg;
+;; }
 
 
 

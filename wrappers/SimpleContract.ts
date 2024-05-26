@@ -1,9 +1,13 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
 
-export type SimpleContractConfig = {};
+export type SimpleContractConfig = {
+    value: number,
+    // publicKey: Buffer,
+    // ownerAddress: Address
+};
 
 export function simpleContractConfigToCell(config: SimpleContractConfig): Cell {
-    return beginCell().endCell();
+    return beginCell().storeUint(config.value, 32).endCell();
 }
 
 export class SimpleContract implements Contract {
@@ -25,5 +29,20 @@ export class SimpleContract implements Contract {
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell().endCell(),
         });
+    }
+
+    async setValue(provider: ContractProvider, via: Sender, opts:{
+        value: bigint
+    } ) {
+        await provider.internal(via, {
+            value:opts.value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell().storeUint(1, 32).endCell()
+        });
+    }
+
+    async getValue(provider: ContractProvider) {
+        const value = await provider.get('get_value', []);
+        return value;
     }
 }
