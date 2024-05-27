@@ -1,9 +1,14 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
+import { crc32 } from '../helpers/crc32';
 
 export type SimpleContractConfig = {
     value: number;
     // publicKey: Buffer,
     // ownerAddress: Address
+};
+
+export const Opcodes = {
+    setValue: crc32('set_value'),
 };
 
 export function simpleContractConfigToCell(config: SimpleContractConfig): Cell {
@@ -39,7 +44,7 @@ export class SimpleContract implements Contract {
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().storeUint(1, 32).endCell(),
+            body: beginCell().storeUint(Opcodes.setValue, 32).storeUint(1, 64).endCell(),
         });
     }
 
