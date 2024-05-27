@@ -3,9 +3,9 @@ import { Cell, toNano } from '@ton/core';
 import { SimpleContract } from '../wrappers/SimpleContract';
 import '@ton/test-utils';
 import { compile } from '@ton/blueprint';
-import {KeyPair, mnemonicNew, mnemonicToPrivateKey} from '@ton/crypto';
+import { KeyPair, mnemonicNew, mnemonicToPrivateKey } from '@ton/crypto';
 
-async function randomKq(){
+async function randomKq() {
     let mnemonics = await mnemonicNew();
     return mnemonicToPrivateKey(mnemonics);
 }
@@ -26,10 +26,14 @@ describe('SimpleContract', () => {
         blockchain = await Blockchain.create();
         kp = await randomKq();
 
-        simpleContract = blockchain.openContract(SimpleContract.createFromConfig({
-            value: 0,
-          
-        }, code));
+        simpleContract = blockchain.openContract(
+            SimpleContract.createFromConfig(
+                {
+                    value: 0,
+                },
+                code,
+            ),
+        );
 
         deployer = await blockchain.treasury('deployer');
 
@@ -48,17 +52,17 @@ describe('SimpleContract', () => {
         // blockchain and simpleContract are ready to use
     });
 
-    it('set value', async () => {
-        deployer = await blockchain.treasury('deployer');
-        const setResult = await simpleContract.setValue(deployer.getSender(),{value: toNano('1')});
-        expect(setResult.transactions).toHaveTransaction({
+    it('should value', async () => {
+        const sendValueResult = await simpleContract.sendValue(deployer.getSender(), toNano('1'));
+        console.log('🚀 ~ it ~ sendValueResult:', sendValueResult);
+        expect(sendValueResult.transactions).toHaveTransaction({
             from: deployer.address,
             to: simpleContract.address,
-            deploy: true,
+            //deploy: false,
             success: true,
         });
 
-        //const value = await simpleContract.getValue();
-        //console.log("value: ", value);
+        const value = await simpleContract.getValue();
+        console.log('value: ', value);
     });
 });

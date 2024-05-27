@@ -1,7 +1,7 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
 
 export type SimpleContractConfig = {
-    value: number,
+    value: number;
     // publicKey: Buffer,
     // ownerAddress: Address
 };
@@ -11,7 +11,10 @@ export function simpleContractConfigToCell(config: SimpleContractConfig): Cell {
 }
 
 export class SimpleContract implements Contract {
-    constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
+    constructor(
+        readonly address: Address,
+        readonly init?: { code: Cell; data: Cell },
+    ) {}
 
     static createFromAddress(address: Address) {
         return new SimpleContract(address);
@@ -31,18 +34,18 @@ export class SimpleContract implements Contract {
         });
     }
 
-    async setValue(provider: ContractProvider, via: Sender, opts:{
-        value: bigint
-    } ) {
+    async sendValue(provider: ContractProvider, via: Sender, value: bigint) {
+        console.log('-sendValue-: ', provider, via, value);
         await provider.internal(via, {
-            value:opts.value,
+            value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().storeUint(1, 32).endCell()
+            body: beginCell().storeUint(1, 32).endCell(),
         });
     }
 
     async getValue(provider: ContractProvider) {
         const value = await provider.get('get_value', []);
+        console.log('🚀 ~ SimpleContract ~ getValue ~ value:', value);
         return value;
     }
 }

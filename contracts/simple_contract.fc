@@ -45,7 +45,7 @@ int get_value() method_id {
 
     int op = in_msg_body~load_uint(32);
 
-    if(op == "set_value"){
+    if(op == "set_value"c){
         store_data(value);
     }
 
