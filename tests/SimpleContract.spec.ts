@@ -12,15 +12,14 @@ async function randomKq() {
 
 describe('SimpleContract', () => {
     let code: Cell;
+    let blockchain: Blockchain;
+    let simpleContract: SandboxContract<SimpleContract>;
+    let kp: KeyPair;
+    let deployer: SandboxContract<TreasuryContract>;
 
     beforeAll(async () => {
         code = await compile('SimpleContract');
     });
-
-    let blockchain: Blockchain;
-    let deployer: SandboxContract<TreasuryContract>;
-    let simpleContract: SandboxContract<SimpleContract>;
-    let kp: KeyPair;
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
@@ -53,16 +52,15 @@ describe('SimpleContract', () => {
     });
 
     it('should value', async () => {
-        const sendValueResult = await simpleContract.sendValue(deployer.getSender(), toNano('1'));
-        console.log('🚀 ~ it ~ sendValueResult:', sendValueResult);
-        // expect(sendValueResult.transactions).toHaveTransaction({
-        //     from: deployer.address,
-        //     to: simpleContract.address,
-        //     //deploy: false,
-        //     success: true,
-        // });
+        const sender = await blockchain.treasury('sender');
+        const sendValueResult = await simpleContract.sendValue(sender.getSender(), 22);
+        expect(sendValueResult.transactions).toHaveTransaction({
+            from: sender.address,
+            to: simpleContract.address,
+            success: true,
+        });
 
-        // const value = await simpleContract.getValue();
-        // console.log('value: ', value);
+        const value = await simpleContract.getValue();
+        console.log('value: ', value);
     });
 });

@@ -1,4 +1,14 @@
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
+import {
+    Address,
+    beginCell,
+    Cell,
+    Contract,
+    contractAddress,
+    ContractProvider,
+    Sender,
+    SendMode,
+    toNano,
+} from '@ton/core';
 import { crc32 } from '../helpers/crc32';
 
 export type SimpleContractConfig = {
@@ -39,18 +49,18 @@ export class SimpleContract implements Contract {
         });
     }
 
-    async sendValue(provider: ContractProvider, via: Sender, value: bigint) {
-        console.log('-sendValue-: ', provider, via, value);
+    async sendValue(provider: ContractProvider, via: Sender, value: number) {
+        //console.log('-sendValue-: ', provider, via, value);
         await provider.internal(via, {
-            value,
+            value: toNano(value),
             sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().storeUint(Opcodes.setValue, 32).storeUint(1, 64).endCell(),
+            body: beginCell().storeUint(Opcodes.setValue, 32).storeUint(value, 32).endCell(),
         });
     }
 
     async getValue(provider: ContractProvider) {
         const value = await provider.get('get_value', []);
-        console.log('🚀 ~ SimpleContract ~ getValue ~ value:', value);
-        return value;
+        //console.log('🚀 ~ SimpleContract ~ getValue ~ value:', value);
+        return value.stack.readNumber();
     }
 }
