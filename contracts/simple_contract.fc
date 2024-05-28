@@ -8,15 +8,21 @@ const int min_tons_for_storage = 1000000000;
 ;; owner withdraw 
 ;; change owner
 
-(int) load_data() inline_ref {
+(int, int, slice) load_data() inline_ref {
     slice ds = get_data().begin_parse();
-    return(ds~load_uint(32));
+    return (
+        ds~load_uint(32),
+        ds~load_uint(256),
+        ds~load_msg_addr()
+    );
 }
 
-() store_data(int value) impure inline {
+() store_data(int value, int public_key, slice owner_address) impure inline {
     set_data(
         begin_cell()
         .store_uint(value, 32)
+        .store_uint(public_key, 256)
+        .store_slice(owner_address)
         .end_cell()
     );
 }
@@ -27,7 +33,7 @@ const int min_tons_for_storage = 1000000000;
 ;; }
 
 int get_value() method_id {
-    (int value) = load_data();
+    (int value, _, _) = load_data();
     return value;
 }
 
@@ -44,9 +50,10 @@ int get_value() method_id {
     }
 
     int op = in_msg_body~load_uint(32);
+    (int value, int public_key, slice owner_address) = load_data();
 
     if(op == "set_value"c) {
-        store_data(in_msg_body~load_uint(32));
+        store_data(in_msg_body~load_uint(32), public_key, in_msg_body~load_msg_addr());
         return ();
     }
 

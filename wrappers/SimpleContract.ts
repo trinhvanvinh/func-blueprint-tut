@@ -13,8 +13,8 @@ import { crc32 } from '../helpers/crc32';
 
 export type SimpleContractConfig = {
     value: number;
-    // publicKey: Buffer,
-    // ownerAddress: Address
+    publicKey: Buffer;
+    ownerAddress: Address;
 };
 
 export const Opcodes = {
@@ -22,7 +22,11 @@ export const Opcodes = {
 };
 
 export function simpleContractConfigToCell(config: SimpleContractConfig): Cell {
-    return beginCell().storeUint(config.value, 32).endCell();
+    return beginCell()
+        .storeUint(config.value, 32)
+        .storeBuffer(config.publicKey)
+        .storeAddress(config.ownerAddress)
+        .endCell();
 }
 
 export class SimpleContract implements Contract {
@@ -49,18 +53,28 @@ export class SimpleContract implements Contract {
         });
     }
 
-    async sendValue(provider: ContractProvider, via: Sender, value: number) {
-        //console.log('-sendValue-: ', provider, via, value);
+    async sendValue(
+        provider: ContractProvider,
+        via: Sender,
+        opts: {
+            value: number;
+            ownerAddress: Address;
+        },
+    ) {
         await provider.internal(via, {
-            value: toNano(value),
+            value: toNano(opts.value),
             sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().storeUint(Opcodes.setValue, 32).storeUint(value, 32).endCell(),
+            body: beginCell()
+                .storeUint(Opcodes.setValue, 32)
+                .storeUint(opts.value, 32)
+                .storeAddress(opts.ownerAddress)
+                .endCell(),
         });
     }
 
-    async getValue(provider: ContractProvider) {
+    async getValue(provider: ContractProvider): Promise<number> {
         const value = await provider.get('get_value', []);
-        //console.log('🚀 ~ SimpleContract ~ getValue ~ value:', value);
         return value.stack.readNumber();
+        //return 1;
     }
 }
