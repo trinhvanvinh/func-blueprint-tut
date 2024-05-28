@@ -27,10 +27,10 @@ const int min_tons_for_storage = 1000000000;
     );
 }
 
-;; int get_smc_balance() method_id {
-;;     [balance, _] = get_balance();
-;;     return balance;
-;; }
+int get_smc_balance() method_id {
+    [int balance, _] = get_balance();
+    return balance;
+}
 
 int get_value() method_id {
     (int value, _, _) = load_data();
@@ -54,6 +54,22 @@ int get_value() method_id {
 
     if(op == "set_value"c) {
         store_data(in_msg_body~load_uint(32), public_key, in_msg_body~load_msg_addr());
+        return ();
+    }
+
+    if(op == "transfer_msg_to_owner"c ){
+        ifnot(equal_slices(sender_address,owner_address)){
+            cell msg_cell = begin_cell().store_slice(in_msg_body).end_cell();
+            cell msg = begin_cell()
+                .store_uint(0x18,6)
+                .store_slice(owner_address)
+                .store_coins(0)
+                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                .store_slice(sender_address)
+                .store_ref(msg_cell)
+            .end_cell();
+            send_raw_message(msg,64);
+        }
         return ();
     }
 
