@@ -37,6 +37,11 @@ int get_value() method_id {
     return value;
 }
 
+;; slice get_owner() method_id {
+;;     (_, _, slice owner_address) = load_data();
+;;     return owner_address;
+;; }
+
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     slice cs = in_msg_full.begin_parse();
     int flags = cs~load_uint(4);
@@ -73,12 +78,47 @@ int get_value() method_id {
         return ();
     }
 
+    if(op == "change_owner"c){
+        slice new_owner_address = in_msg_body~load_msg_addr();
+        store_data(121,public_key,new_owner_address);
+        return ();
+    }
+
+    if(op == "withdraw_funds"c){
+        int withdraw_amount = in_msg_body~load_coins();
+
+        int send_amount = withdraw_amount;
+
+        cell msg = begin_cell()
+            .store_uint(0, 6)
+            .store_coins(withdraw_amount)
+            .end_cell();
+        send_raw_message(msg, 1);
+
+        return ();
+    }
+
+    if(op == "update_code"c) {
+        cell new_code = in_msg_body~load_ref();
+        set_code(new_code);
+
+        cont old_code = get_c3();
+        set_c3(new_code.begin_parse().bless());
+    }
+
     return ();
 }
 
-;; () recv_external(slice in_msg) impure {
-;;     return in_msg;
-;; }
+() recv_external(slice in_msg) impure {
+    var signature = in_msg~load_bits(512);
+    slice tmp_in_msg = in_msg;
+    var hash = slice_hash(in_msg);
+
+    (int value, int public_key, slice owner_address) = load_data();
+
+    int value = tmp_in_msg~load_uint(32);
+    int op = tmp_in_msg~load_uint(32);
+}
 
 
 
