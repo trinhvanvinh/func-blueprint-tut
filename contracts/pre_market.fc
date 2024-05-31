@@ -1,0 +1,53 @@
+#include "imports/stdlib.fc";
+
+;; === DATA ==
+;; token
+global slice token;
+global int settleTime;
+global int settleDuration;
+global int settleRate;
+global int status;
+;; offer
+global int offerType;
+global int tokenId;
+global slice exToken;
+global int amount;
+global int value;
+global int collateral;
+global int filledAmount;
+global int status;
+global slice offeredBy;
+global cell fullMatch; ;; cell is type data boolean
+;; order 
+global int offerId;
+global int amount;
+global slice seller;
+global slice buyer;
+global int status;
+;; config
+global int pledgeRate;
+global int feeRefund;
+global int feeSettle;
+global slice feeWallet;
+
+const int WEI6 = 1000000;
+const int OFFER_BUY = 1;
+const int OFFER_SELL = 2;
+
+const int STATUS_OFFER_OPEN = 1;
+const int STATUS_OFFER_FILLED = 2;
+const int STATUS_OFFER_CANCELLED = 3;
+
+const int STATUS_ORDER_OPEN = 1;
+const int STATUS_ORDER_SETTLE_FILLED = 2;
+const int STATUS_ORDER_SETTLE_CANCELLED = 3;
+const int STATUS_ORDER_CANCELLED = 3;
+
+const int STATUS_TOKEN_ACTIVE = 1;
+const int STATUS_TOKEN_INACTIVE = 2;
+const int STATUS_TOKEN_SETTLE = 3;
+
+
+() load_token_paramester() impure {
+      
+}
